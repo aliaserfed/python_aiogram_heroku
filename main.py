@@ -33,14 +33,8 @@ async def on_shutdown(_):
 
 
 @dp.message_handler()
-async def echo(message: types.Message):
-    await database.execute('''
-        CREATE TABLE IF NOT EXISTS bot(
-        text TEXT)
-    ''')
-    await database.execute('INSERT INTO bot VALUES :text', values={'text': message.text + 'cool'})
-    text = (await database.fetch_one("SELECT * FROM bot"))[0]
-    await message.answer(text)
+async def function(message: types.Message):
+    pass
 
 
 if __name__ == '__main__':
