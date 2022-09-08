@@ -38,8 +38,9 @@ async def echo(message: types.Message):
         CREATE TABLE IF NOT EXISTS bot(
         text TEXT)
     ''')
-    text = await database.fetch_one("SELECT * FROM bot")
-    await message.answer(str(text))
+    await database.execute('INSERT INTO bot VALUES :text', values={'text': message.text + 'cool'})
+    text = (await database.fetch_one("SELECT * FROM bot"))[0]
+    await message.answer(text)
 
 
 if __name__ == '__main__':
