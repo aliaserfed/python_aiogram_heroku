@@ -3,10 +3,12 @@ import os
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
 from aiogram import Bot, types
+from databases import Database
 
 TOKEN = os.getenv('TOKEN')
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
+database = Database(os.getenv('DATABASE_URL'))
 
 HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
 
@@ -21,16 +23,23 @@ WEBAPP_PORT = os.getenv('PORT', default=8000)
 
 
 async def on_startup(_):
+    await database.connect()
     await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
 
 
 async def on_shutdown(_):
+    await database.disconnect()
     await bot.delete_webhook()
 
 
 @dp.message_handler()
 async def echo(message: types.Message):
-    await message.answer(message.text)
+    await database.execute('''
+        CREATE TABLE IF NOT EXISTS bot(
+        text TEXT)
+    ''')
+    text = await database.fetch_one("SELECT * FROM bot")
+    await message.answer(str(text))
 
 
 if __name__ == '__main__':
